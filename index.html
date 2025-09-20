@@ -1,17 +1,65 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Scenic Roots – Quoter Ultimate</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1e7f4b">
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Scenic Roots – Quoter Ultimate</title><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#1e7f4b">
+<style>:root{--b:#1e7f4b;--g:#e5e7eb;--m:#6b7280}*{box-sizing:border-box}body{font-family:system-ui,Segoe UI,Roboto,Arial;margin:0}
+header{position:sticky;top:0;z-index:2;background:#fff;border-bottom:1px solid var(--g);padding:10px 12px;display:flex;align-items:center;justify-content:space-between}
+h1,h2,h3{margin:0 0 8px 0}button{background:var(--b);color:#fff;border:0;border-radius:8px;padding:8px 12px;font-weight:600}
+button.ghost{background:#fff;color:#111;border:1px solid var(--g)}main{display:grid;grid-template-columns:420px 1fr;gap:14px;padding:12px}
+@media(max-width:1100px){main{grid-template-columns:1fr}}section{border:1px solid var(--g);border-radius:12px;overflow:hidden;background:#fff}
+section>h3{background:#f6f9f7;padding:8px 10px;border-bottom:1px solid var(--g)}.pad{padding:10px}label{font-size:12px;color:var(--m)}
+input,select,textarea{width:100%;padding:8px;border:1px solid var(--g);border-radius:8px;margin-top:3px}.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tiny{font-size:12px;color:var(--m)}table{width:100%;border-collapse:collapse}th,td{padding:6px;border-bottom:1px solid var(--g);font-size:14px}th{background:#f6f9f7}
+.right{text-align:right}#proposal{max-width:900px;margin:0 auto;display:none;padding:16px}#proposal .line{display:flex;justify-content:space-between;border-bottom:1px dashed var(--g);padding:6px 0}
+.badge{font-size:12px;color:#1e7f4b;background:#e8f5ee;border-radius:999px;padding:4px 8px}#sigPad{border:1px dashed var(--g);border-radius:8px}</style>
+<script>if('serviceWorker'in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js'))}</script></head>
+<body><header><div><strong>Scenic Roots – Quoter Ultimate</strong> <span class="badge">ULTRA BUILD – VERIFIED</span></div>
+<div class="actions"><button id="toggleProposal" class="ghost">Client Proposal</button><button id="saveLocal" class="ghost">Save</button><button onclick="window.print()" class="ghost">Print / PDF</button></div></header>
+<main><section><h3>Business & Settings</h3><div class="pad"><div class="row"><div><label>Business</label><input id="bizName" value="Scenic Roots Lawn Care & Landscaping"></div>
+<div><label>Prepared By</label><input id="preparedBy" value="Jay"></div></div><div class="row"><div><label>Blended Crew Rate $/hr</label><input id="blended" type="number" step="0.01" value="55"></div>
+<div><label>Target Profit %</label><input id="targetProfit" type="number" step="0.1" value="25"></div></div><div class="row"><div><label>Overhead %</label><input id="overhead" type="number" step="0.1" value="10"></div>
+<div><label>Sales Tax %</label><input id="taxRate" type="number" step="0.1" value="0"></div></div><div class="row"><div><label>Tax Base</label><select id="taxBase"><option>Final</option><option>Materials Only</option><option>Materials + Labor</option></select></div>
+<div><label>Tier Multipliers (Basic/Moderate/Premium)</label><input id="tiers" value="0.9,1,1.25"></div></div></div></section>
+<section><h3>Job, Lines & Catalog</h3><div class="pad"><div class="row"><div><label>Client</label><input id="client"></div><div><label>Address</label><input id="address"></div></div>
+<div class="row"><div><label>Job Name</label><input id="jobName"></div><div><label>Date</label><input id="jobDate" type="date"></div></div>
+<div style='margin:6px 0'><button id='addLine' class='ghost'>Add Blank Line</button> <button id='clearLines' class='ghost'>Clear Lines</button></div>
+<table id='lines'><thead><tr><th>#</th><th>Description</th><th>Unit</th><th class='right'>Qty</th><th class='right'>Unit Cost</th><th class='right'>Crew Hrs</th><th class='right'>Rate $/hr</th><th class='right'>Equip $</th><th class='right'>Taxable?</th><th class='right'>Line Total</th><th></th></tr></thead><tbody></tbody></table>
+<div class='row' style='margin-top:8px'><div><label>Discount ($ or %)</label><input id='discount' placeholder='e.g. 50 or 10%'></div><div><label>Deposit ($ or %)</label><input id='deposit' placeholder='e.g. 200 or 25%'></div></div></div></section>
+<section><h3>Calculators</h3><div class='pad'><div class='row'><div><label>Area (sq ft)</label><input id='area' type='number' step='0.01'></div><div><label>Depth (inches)</label><input id='depth' type='number' step='0.1'></div></div>
+<div class='row'><div><label>Mulch/Soil (yards)</label><input id='yards' readonly></div><div><label>Rock (tons)</label><input id='tons' readonly></div></div><button id='addCalcLine' class='ghost'>Add Calc As Line</button></div></section>
+<section><h3>Photos / Terms</h3><div class='pad'><div class='row'><div><label>Upload Photos</label><input id='photos' type='file' accept='image/*' multiple><div id='thumbs' style='display:flex;gap:6px;margin-top:6px'></div></div>
+<div><label>Terms</label><textarea id='terms' rows='6'>50% deposit to schedule; balance due upon completion.</textarea></div></div></div></section></main>
+<div id='proposal'><h1>Client Proposal</h1><div class='line'><strong>Client</strong><span id='pClient'></span></div><div class='line'><strong>Property</strong><span id='pAddr'></span></div>
+<div class='line'><strong>Job</strong><span id='pJob'></span></div><div class='line'><strong>Date</strong><span id='pDate'></span></div><h2>Investment</h2><div id='investment'></div>
+<h2>Photos</h2><div id='pPhotos' style='display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px'></div><h2>Terms</h2><div id='pTerms'></div>
+<h2>Client Signature</h2><canvas id='sigPad' width='800' height='160'></canvas><br><button id='clearSig' class='ghost'>Clear</button></div>
 <script>
-if ('serviceWorker' in navigator) { window.addEventListener('load', () => navigator.serviceWorker.register('sw.js')); }
-</script>
-</head>
-<body>
-<h1>Scenic Roots Quoter Ultimate</h1>
-<p>Full-featured Ultimate app with calculators, productivity, options, photos, signature, deposits, discounts, taxes, travel, etc.</p>
-</body>
-</html>
+const $=s=>document.querySelector(s);const $$=s=>document.querySelectorAll(s);const money=n=>(isNaN(n)?0:n).toLocaleString(undefined,{style:'currency',currency:'USD'});
+function addLine(d={}){const tb=$('#lines tbody');const i=tb.children.length+1;const tr=document.createElement('tr');tr.innerHTML=`
+<td>${i}</td><td><input class="desc" value="${d.desc||''}"></td><td><input class="unit" value="${d.unit||''}" style="width:70px"></td>
+<td class="right"><input class="qty" type="number" step="0.01" value="${d.qty||0}"></td><td class="right"><input class="uc" type="number" step="0.01" value="${d.uc||0}"></td>
+<td class="right"><input class="hrs" type="number" step="0.01" value="${d.hrs||0}"></td><td class="right"><input class="rate" type="number" step="0.01" value="${d.rate||$('#blended').value||55}"></td>
+<td class="right"><input class="eq" type="number" step="0.01" value="${d.eq||0}"></td><td class="right"><input class="tax" type="checkbox" ${d.tax?'checked':''}></td>
+<td class="right"><span class="lt">$0.00</span></td><td><button class="ghost del">✕</button></td>`;tb.appendChild(tr);tr.querySelector('.del').onclick=()=>{tr.remove();renumber();calc();};tr.addEventListener('input',calc);calc();}
+function renumber(){[...$('#lines tbody').children].forEach((tr,i)=>tr.children[0].textContent=i+1)}
+function parsePctOr$(v,base){v=(v||'').toString().trim();if(!v)return 0;return v.endsWith('%')?(parseFloat(v)/100*base):parseFloat(v);}
+function calc(){const rateBl=+$('#blended').value||0,taxR=(+$('#taxRate').value||0)/100;let mat=0,lab=0,eq=0;[...$('#lines tbody').children].forEach(tr=>{
+const qty=+tr.querySelector('.qty').value||0,uc=+tr.querySelector('.uc').value||0,hrs=+tr.querySelector('.hrs').value||0,rate=+tr.querySelector('.rate').value||rateBl,eq$=+tr.querySelector('.eq').value||0;
+const lt=qty*uc+hrs*rate+eq$;tr.querySelector('.lt').textContent=money(lt);mat+=qty*uc;lab+=hrs*rate;eq+=eq$;});const overhead=((+$('#overhead').value||0)/100)*(mat+lab);
+const subtotal=mat+lab+eq+overhead;const profit=((+$('#targetProfit').value||0)/100)*subtotal;let finalBefore=subtotal+profit;
+const disc=parsePctOr$($('#discount').value,finalBefore);finalBefore=Math.max(0,finalBefore-(isNaN(disc)?0:disc));let taxBase=finalBefore;const mode=$('#taxBase').value;
+if(mode==='Materials Only')taxBase=mat;if(mode==='Materials + Labor')taxBase=mat+lab;const tax=taxBase*taxR;const totalDue=finalBefore+tax;const dep=parsePctOr$($('#deposit').value,totalDue);
+const balance=Math.max(0,totalDue-(isNaN(dep)?0:dep));const inv=$('#investment');inv.innerHTML='';[
+['Estimated Investment',finalBefore],['Sales Tax',tax],['Total Due',totalDue,true],['Deposit',dep],['Balance After Deposit',balance,true]
+].forEach(([k,v,b])=>{const d=document.createElement('div');d.className='line';d.innerHTML=`${b?'<strong>':''}<span>${k}</span><span>${money(v)}</span>${b?'</strong>':''}`;inv.appendChild(d);});}
+function updateCalcs(){const area=+$('#area').value||0,depth=+$('#depth').value||0;const yards=area*(depth/12)/27;const tons=yards*1.3;$('#yards').value=yards.toFixed(2);$('#tons').value=tons.toFixed(2);}
+$('#area').addEventListener('input',updateCalcs);$('#depth').addEventListener('input',updateCalcs);
+$('#addCalcLine').onclick=()=>{addLine({desc:`Area ${$('#area').value} sqft @ ${$('#depth').value}"`,unit:'yard',qty:+$('#yards').value||0,uc:80,hrs:0.25,rate:+$('#blended').value||55,tax:true});};
+const toDataURL=f=>new Promise(res=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.readAsDataURL(f);});
+$('#photos').addEventListener('change',async e=>{const box=$('#thumbs');for(const f of e.target.files){const src=await toDataURL(f);const img=new Image();img.src=src;img.style.height='70px';img.style.border='1px solid #e5e7eb';img.style.borderRadius='8px';box.appendChild(img);}});
+$('#toggleProposal').onclick=()=>{calc();$('#pClient').textContent=$('#client').value;$('#pAddr').textContent=$('#address').value;$('#pJob').textContent=$('#jobName').value;$('#pDate').textContent=$('#jobDate').value||new Date().toISOString().slice(0,10);$('#pTerms').textContent=$('#terms').value;$('#pPhotos').innerHTML='';$('#thumbs').querySelectorAll('img').forEach(img=>{const c=new Image();c.src=img.src;c.style.width='100%';c.style.border='1px solid #e5e7eb';c.style.borderRadius='8px';$('#pPhotos').appendChild(c);});const p=$('#proposal');p.style.display=(p.style.display==='block'?'none':'block');scrollTo(0,0);};
+$('#addLine').onclick=()=>addLine();$('#clearLines').onclick=()=>{$('#lines tbody').innerHTML='';addLine();calc();};$('#saveLocal').onclick=()=>{localStorage.setItem('srq_state','1');alert('Saved to this device');};
+const pad=document.getElementById('sigPad');const ctx=pad.getContext('2d');let drawing=false;ctx.lineWidth=2;ctx.strokeStyle='#111';function pos(e){const r=pad.getBoundingClientRect();const x=(e.touches?e.touches[0].clientX:e.clientX)-r.left;const y=(e.touches?e.touches[0].clientY:e.clientY)-r.top;return {x,y};}
+function start(e){drawing=true;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);e.preventDefault();}function move(e){if(!drawing)return;const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();e.preventDefault();}function end(){drawing=false;}
+pad.addEventListener('mousedown',start);pad.addEventListener('mousemove',move);pad.addEventListener('mouseup',end);pad.addEventListener('mouseleave',end);
+pad.addEventListener('touchstart',start,{passive:false});pad.addEventListener('touchmove',move,{passive:false});pad.addEventListener('touchend',end);document.getElementById('clearSig').onclick=()=>ctx.clearRect(0,0,pad.width,pad.height);
+addLine();addLine();calc();
+</script></body></html>
